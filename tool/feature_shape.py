@@ -1,8 +1,5 @@
 #!/bin/python
 import sys
-if '../' not in sys.path:
-    sys.path.insert(0, '../')
-
 import librosa as ra
 from config import config
 from preprocessing import get_an_filename

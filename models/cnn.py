@@ -1,6 +1,4 @@
 import sys  # add new path to search top level module
-if '../' not in sys.path:
-    sys.path.insert(0, '../')
 import torch
 from dataset import (AudioDataset,
                      get_feature_shape,

@@ -1,4 +1,4 @@
-tool/telegram.py
+tool/secret.py
 data/*
 
 # Byte-compiled / optimized / DLL files

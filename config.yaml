@@ -1,8 +1,8 @@
 preprocessing:
   dataset: ESC
-  resample_audio_folder: /home/siuoly/lab/ml/Audio-Classification-pytorch/data
-  audio_folder: /home/siuoly/lab/dataset/ESC-50-master/audio
-  meta_file: /home/siuoly/lab/dataset/ESC-50-master/meta/esc50.csv
+  resample_audio_folder: ./data
+  audio_folder: /home/siuoly/ml/datasets/ESC-50-master/audio
+  meta_file: /home/siuoly/ml/datasets/ESC-50-master/meta/esc50.csv
   times: 5 # seconds
   new_sr: 22050  # 16k 比8k 好
   # feature: stft
@@ -31,15 +31,9 @@ dataset:
   # train_folder: ./data/db_noNorm_sr16000_nfft2048_hop1024_n_mels64/ #  0.640
   # train_folder: ./data/db_noNorm_sr16000_nfft2048_hop320_n_mels128/ #  0.639
 
-  # train_folder: ./data/sr16000_nfft2048_hpo1024_n_mels128/
-  # train_folder: ./data/no_norm_db_sr16000_nfft1024_n_mels128/
-  # train_folder: ./data/norm_no_db_sr16000_nfft1024_n_mels128/
-  # train_folder: ./data/non_norm_sr16000_nfft1024_n_mels128/
-  # train_folder: ./data/sr16000_nfft512_hop_256_stft_phase/
- # meta_file: /home/siuoly/lab/dataset/ESC-50-master/meta/esc10.csv
-  meta_file: /home/siuoly/lab/dataset/ESC-50-master/meta/esc50.csv
+  meta_file: /home/siuoly/ml/datasets/ESC-50-master/meta/esc50.csv
 exp_folder: ./exp/test1/
-num_epoch: 100
+num_epoch: 150
 batch_size: 32
 lr: 4e-4  # 隨著適合的 batch_size 而變化
 num_class: 50

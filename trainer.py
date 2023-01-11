@@ -11,7 +11,8 @@ from torchmetrics import Accuracy
 from tqdm import tqdm
 from config import config
 from tool.output import enable_stdout, disable_stdout
-from tool.telegram import send_configed_message
+from tool.draw import get_figure_BytesIO
+# from tool.telegram import send_configed_message
 
 
 class Trainer():
@@ -117,8 +118,13 @@ class Trainer():
             print(self.get_fold_message(fold))
             disable_stdout()
         enable_stdout()
-
         print(self.get_k_fold_message())
+
+    def get_draw_object(self, record_type = 'loss' ):  # loss, or val_accuracy
+        if record_type not in ("val_accuracy", "loss"):
+            raise RuntimeError("reocrd type must be 'val_accuracy' or 'loss'.")
+        data = [ record[record_type] for record in self.record_all_epoch ]
+        return get_figure_BytesIO( title=record_type, data = data )
 
 
 
