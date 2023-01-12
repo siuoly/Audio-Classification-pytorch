@@ -26,7 +26,7 @@ def create_resampled_folder(resample_audio_folder):
         sf.write(new_path, wav, new_sr)
     arguments = zip(audio_paths, new_audio_paths)
     Parallel(n_jobs=12)(delayed(resample_and_save)(file, new_path)
-                        for file, new_path in tqdm(arguments))
+                        for file, new_path in tqdm(arguments, total=len(audio_paths)))
 
 
 def get_an_filename():
@@ -82,7 +82,7 @@ def processing_a_audio(file):
 
 
 def save_feature(file, feature):
-    save_path = data_folder / (os.path.basename(file) + ".npy")
+    save_path = Path( config['dataset']['train_folder'] ) / (Path(file).name + ".npy")
     np.save(save_path, feature)
     return save_path
 
@@ -94,24 +94,25 @@ def processing_and_save_a_file(file):
 
 def make_data_folder():
     data_folder = Path( config['dataset']['train_folder'] )
-    if not data_folder.exists():
+    if data_folder.exists():
+        print( f"feature folder {data_folder} exist." )
+        return False
+    else:
         data_folder.mkdir( exist_ok=True )
         print( f"create data folder:{data_folder}" )
-    else:
-        print( f"feature folder {data_folder} exist." )
-        exit(0)
-    return data_folder
+    return True
 
 
 def normalized_data(x):
-    axis = tuple(np.arange(x.ndim)[-2:])  # 取最後兩維度(0,1) or (1,2)
+    axis = tuple(np.arange(x.ndim)[-2:])  # 取最後兩維度(0,1) or (0,1,2)
     return (x-x.mean(axis=axis, keepdims=True)) / \
         x.std(axis=axis, keepdims=True)
 
-if __name__ == "__main__":
+def main(show=True):
     meta = process_arg['meta_file']
     meta = pd.read_csv(meta)
-    show_preprocessing_message()
+    if show:
+        show_preprocessing_message()
 
     resample_audio_folder = Path(process_arg['resample_audio_folder'])/f"audio_sr{new_sr}"
     if not resample_audio_folder.exists():
@@ -120,12 +121,12 @@ if __name__ == "__main__":
         print("resample audio folder ", resample_audio_folder, "exists")
 
     process_arg['audio_folder'] = str(resample_audio_folder)
-    # print(get_stft_and_phase_of_file(get_an_filename()).shape)
-    # print(processing_a_audio(get_an_filename()))
-    data_folder = make_data_folder()
+    if not make_data_folder():  
+        return  # 跳出 preprocessing
     audio_files = glob.glob( process_arg['audio_folder']+ '/*.wav' )
 
     features = Parallel(n_jobs=8)(delayed(processing_and_save_a_file)(file)
                                   for file in tqdm(audio_files))
 
-    # print(result)
+if __name__ == "__main__":
+    main(show=True)

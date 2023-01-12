@@ -4,13 +4,14 @@ from dataset import (AudioDataset,
                      get_a_batch_samples,
                      get_feature_shape)
 from models.cnn import CNNNetwork
-import torch
+import torch, sys
+from io import StringIO
 from torch import optim
 from torch.utils.data import DataLoader
 from torchmetrics import Accuracy
-from tqdm import tqdm
+from tqdm import tqdm, trange
 from config import config
-from tool.output import enable_stdout, disable_stdout
+# from tool.output import enable_stdout, disable_stdout
 from tool.draw import get_figure_BytesIO
 # from tool.telegram import send_configed_message
 
@@ -47,7 +48,6 @@ class Trainer():
     def train_a_epoch(self):
         self.model.train()
         self.metric.reset()
-        # progress_bar = self.tqdm_bar(self.trainloader)
         total_loss = 0
         for x, y in self.trainloader:
             x = x.cuda(); y = y.cuda()
@@ -60,14 +60,17 @@ class Trainer():
             self.optimizer.step()
         self.record_epoch["loss"] = total_loss.item()
 
-    def train_all_epoch(self):
-        for epoch in range(config["num_epoch"]):
+    def train_all_epoch(self, show=True, using_bar=False):
+        print_file = sys.stdout if show is True else StringIO()  # 抑制輸出
+        iteration = trange(config["num_epoch"]) \
+                if using_bar else range(config["num_epoch"])
+        for epoch in iteration:
             self.train_a_epoch()
             self.validation()
             self.record_all_epoch.append(
                     deepcopy(dict(epoch=epoch, **self.record_epoch)))
-            print(self.get_epoch_message(epoch))
-        print(self.get_best_epoch_message())
+            print(self.get_epoch_message(epoch), file=print_file)
+        print(self.get_best_epoch_message(), file=print_file)
 
     def validation(self):
         self.model.eval()
@@ -105,19 +108,15 @@ class Trainer():
             acc[i] = record["val_accuracy"]
         return f"k_fold mean:{acc.mean():.3f} std:{acc.std():.3f}"
 
-    def train_k_fold(self):
-        disable_stdout()  # disable print()
+    def train_k_fold(self, using_bar=False):
         self.fold_record_list = []
         for fold in range(5):
             config["test_fold_num"] = fold+1   # fold in [1,5]
             self.__init__()  # reset model, trainloader, testloader
-            self.train_all_epoch()
+            self.train_all_epoch(show=False, using_bar=using_bar)
             self.fold_record_list.append(
                     self.record_all_epoch[self.get_best_epoch()])
-            enable_stdout()
             print(self.get_fold_message(fold))
-            disable_stdout()
-        enable_stdout()
         print(self.get_k_fold_message())
 
     def get_draw_object(self, record_type = 'loss' ):  # loss, or val_accuracy
@@ -125,6 +124,7 @@ class Trainer():
             raise RuntimeError("reocrd type must be 'val_accuracy' or 'loss'.")
         data = [ record[record_type] for record in self.record_all_epoch ]
         return get_figure_BytesIO( title=record_type, data = data )
+        # for send messsage to telegram
 
 
 

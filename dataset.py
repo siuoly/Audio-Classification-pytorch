@@ -13,7 +13,7 @@ class BaseAudioDataset(Dataset):
         self.meta_file = dataset_arg["meta_file"]
         self.meta = pd.read_csv(self.meta_file)
         self.files, self.targets = None, None
-        self.init_files_targets()
+        self.init_files_and_targets()
 
     def __len__(self):
         return len(self.meta.index)
@@ -23,9 +23,8 @@ class BaseAudioDataset(Dataset):
         spectrogram = torch.from_numpy( spectrogram )
         return spectrogram, self.targets[index]
 
-    def init_files_targets(self):
-        self.files = (self.train_folder+
-                            self.meta["filename"]+".npy").values
+    def init_files_and_targets(self):
+        self.files = (self.train_folder+ self.meta["filename"]+".npy").values
         self.targets = self.meta["target"].values
 
 class AudioDataset(BaseAudioDataset):
@@ -36,7 +35,7 @@ class AudioDataset(BaseAudioDataset):
             self.meta = meta[meta["fold"] != test_fold_num]
         else:
             self.meta = meta[meta["fold"] == test_fold_num]
-        self.init_files_targets()
+        self.init_files_and_targets()
 
 
 def get_feature_shape():
