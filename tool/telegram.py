@@ -17,7 +17,7 @@ def send_telegram_msg(msg: str,
 
 def get_config_message(config):  # 2022/01/23 ./data/xxxdir/ batch=23
     # message = f"{time.ctime()}\n"
-    message = config['dataset']['train_folder'] + "\n"
+    message = config['dataset']['feature_folder'] + "\n"
     message += config['message']
     return message
 

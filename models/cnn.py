@@ -7,10 +7,9 @@ from dataset import (AudioDataset,
 import torch.nn as nn
 import torch.nn.functional as F
 from torchinfo import summary
-from models.augment import transform
+# from models.augment import transform
 from torchaudio.transforms import TimeMasking, FrequencyMasking
 from config import config
-fdim, tdim = get_feature_shape()  # time, freq dimension
 
 
 def conv_block(inch,outch,ker,stride,padding,poolker):
@@ -27,10 +26,17 @@ def conv_block(inch,outch,ker,stride,padding,poolker):
     return conv
 
 
+def linear_block(in_layer, out_layer):
+    return nn.Sequential( nn.Dropout(0.5), nn.Linear(in_layer, out_layer))
+
+
+
 class CNNNetwork(nn.Module):
     def __init__(self):
         super().__init__()
         # 4 conv blocks / flatten / linear / softmax
+        model_arg = config["model"]["arg"]
+        self.x_shape = get_feature_shape()  # input data shpae time, freq dimension
         self.conv = nn.Sequential()
         self.conv.append(conv_block(config["in_channel"], 16, 3, 1, 2, 2))
         self.conv.append(conv_block(16, 32, 3, 1, 2, 2))
@@ -38,33 +44,37 @@ class CNNNetwork(nn.Module):
         self.conv.append(conv_block(64, 128, 3, 1, 2, 2))
         self.conv.append(conv_block(128, 128, 3, 1, 2, 2))
         self.flatten = nn.Flatten()
+        # linear_arg = model_arg[self.compute_linear_layer_dim(),
+        #                     *model_arg["linear"], config["num_class"],]
+        # self.linear = nn.Sequential()
+        # for in_layer, out_layer in zip(linear_arg, linear_arg[1:]):
+        #     self.linear.append(linear_block(in_layer, out_layer))
         self.linear = nn.Sequential(
-                nn.Dropout(0.5),
-                nn.Linear(self.compute_linear_layer_dim(), 256),
-                nn.Dropout(0.5),
-                nn.Linear(256,config["num_class"]),
-                # nn.ReLU(),
-                # nn.Linear(256, 50)
+                nn.Dropout(0.7),
+                nn.Linear(self.compute_linear_layer_dim(), model_arg["linear"] ),
+                nn.Dropout(0.7),
+                nn.ReLU(),
+                nn.Linear( model_arg["linear"],config["num_class"]),
                 )
         self.softmax = nn.Softmax(dim=1)
         self.transform = nn.Sequential(
-        TimeMasking( time_mask_param=int(tdim*0.5)),
-        FrequencyMasking(freq_mask_param=int(fdim*0.5))
+        FrequencyMasking(freq_mask_param=int(self.x_shape[0]*0.5)),
+        TimeMasking( time_mask_param=int(self.x_shape[1]*0.5))
                           )
 
 
     def forward(self, input_data):
         if len(input_data.shape) != 4:  # (N,f,t) -->(N,1,f,t)
             input_data = input_data.unsqueeze(1)
-        if self.training and config["transform"]:  # 手動關閉, 他不會自動檢查 model.eval()
-            x = transform(input_data)
+        if False and self.training and config["transform"]:  # 手動關閉, 他不會自動檢查 model.eval()
+            x = self.transform(input_data)
         x = self.conv(input_data)
         x = self.flatten(x)
         logit = self.linear(x)
         return logit
 
     def compute_linear_layer_dim(self):
-        x = torch.ones((config["batch_size"], config["in_channel"], fdim, tdim))
+        x = torch.ones((config["batch_size"], config["in_channel"], *self.x_shape))
         x = self.conv(x)
         x = self.flatten(x)
         return x.shape[-1]

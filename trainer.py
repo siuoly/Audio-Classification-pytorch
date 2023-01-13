@@ -35,7 +35,7 @@ class Trainer():
     def show_init_message(self):
         pprint(config["preprocessing"]["mel_arg"])
         print("input feature shape", get_feature_shape())
-        print("train datafolder", config["dataset"]["train_folder"])
+        print("train datafolder", config["dataset"]["feature_folder"])
         self.model.summary()
 
     def train_a_batch(self):

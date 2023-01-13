@@ -1,16 +1,13 @@
 preprocessing:
-  dataset: ESC
   resample_audio_folder: ./data
-  audio_folder: /home/siuoly/ml/datasets/ESC-50-master/audio
-  meta_file: /home/siuoly/ml/datasets/ESC-50-master/meta/esc50.csv
   times: 5 # seconds
-  new_sr: 16000  # 16k 比8k 好
+  new_sr: 22050  # 16k 比8k 好
   # feature: stft
   feature: mel
   mel_arg:
     power: 2
-    n_fft: 1024  # 2048比1024好
-    hop_length: 512  # 和320差不多, 育大愈好
+    n_fft: 2048  # 2048比1024好
+    hop_length: 1024  # 和320差不多, 育大愈好
     n_mels: 128
     # fmin: 100
     fmax: 8000
@@ -22,16 +19,26 @@ preprocessing:
   normalize: False # 不論有沒有dbscale, 這個不一定要有
 
 dataset:
+  dataset: ESC
+  audio_folder: /home/siuoly/ml/datasets/ESC-50-master/audio
+  meta_file: /home/siuoly/ml/datasets/ESC-50-master/meta/esc50.csv
   # train_folder: ./data/sr8000_nfft1024_n_mels128/
   # train_folder: ./data/sr16000_nfft1024_n_mels128/
   # train_folder: ./data/db_noNorm_ssr16000_nfft1024_hpo512_n_mels128/ #  .653
-  # train_folder: ./data/db_noNorm_sr16000_nfft2048_hop512_n_mels128/ #  0.66
+  feature_folder: ./data/db_noNorm_sr16000_nfft2048_hop512_n_mels128/ #  0.66
   # train_folder: ./data/db_noNorm_sr16000_nfft2048_hop1024_n_mels128/ #  0.661
-  train_folder: ./data/db_noNorm_sr22050_nfft2048_hop768_n_mels128--/
+  # train_folder: ./data/db_noNorm_sr22050_nfft2048_hop768_n_mels128/  # .632
   # train_folder: ./data/db_noNorm_sr16000_nfft2048_hop1024_n_mels64/ #  0.640
   # train_folder: ./data/db_noNorm_sr16000_nfft2048_hop320_n_mels128/ #  0.639
-
-  meta_file: /home/siuoly/ml/datasets/ESC-50-master/meta/esc50.csv
+model:
+  name: GeneralCnn
+  arg:
+    cnn:  # inch,outch,ker,stride,padding,poolker
+      - [16,3,1,2,2]
+      - [16,32,3,1,2,2]
+      - [32,64,3,1,2,2]
+      - [128,128,3,1,2,2]
+    linear: 256
 exp_folder: ./exp/test1/
 num_epoch: 150
 batch_size: 32
@@ -41,4 +48,3 @@ testfold: 1
 in_channel: 1
 transform: True
 message: ""
-
