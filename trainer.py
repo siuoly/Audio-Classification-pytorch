@@ -35,7 +35,7 @@ class Trainer():
     def show_init_message(self):
         pprint(config["preprocessing"]["mel_arg"])
         print("input feature shape", get_feature_shape())
-        print("train datafolder", config["dataset"]["feature_folder"])
+        print("train datafolder", config["feature_folder"])
         self.model.summary()
 
     def train_a_batch(self):
@@ -65,6 +65,7 @@ class Trainer():
         iteration = trange(config["num_epoch"]) \
                 if using_bar else range(config["num_epoch"])
         for epoch in iteration:
+            # if epoch == 30: breakpoint()
             self.train_a_epoch()
             self.validation()
             self.record_all_epoch.append(
@@ -125,8 +126,6 @@ class Trainer():
         data = [ record[record_type] for record in self.record_all_epoch ]
         return get_figure_BytesIO( title=record_type, data = data )
         # for send messsage to telegram
-
-
 
 # trainer = Trainer()
 # trainer.show_init_message()

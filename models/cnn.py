@@ -5,7 +5,6 @@ from dataset import (AudioDataset,
                      get_a_dataset_sample,
                      get_a_batch_samples)
 import torch.nn as nn
-import torch.nn.functional as F
 from torchinfo import summary
 # from models.augment import transform
 from torchaudio.transforms import TimeMasking, FrequencyMasking
@@ -67,7 +66,7 @@ class CNNNetwork(nn.Module):
         if len(input_data.shape) != 4:  # (N,f,t) -->(N,1,f,t)
             input_data = input_data.unsqueeze(1)
         if False and self.training and config["transform"]:  # 手動關閉, 他不會自動檢查 model.eval()
-            x = self.transform(input_data)
+            input_data = self.transform(input_data)
         x = self.conv(input_data)
         x = self.flatten(x)
         logit = self.linear(x)
@@ -90,7 +89,7 @@ class CNNNetwork(nn.Module):
     def summary(self):
         summary(self.cuda(),
                 input_size=(config["batch_size"],
-                            config["in_channel"], fdim, tdim))
+                            config["in_channel"], *self.x_shape))
 
 if __name__ == "__main__":
     cnn = CNNNetwork()

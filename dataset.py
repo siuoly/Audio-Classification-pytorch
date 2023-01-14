@@ -1,15 +1,16 @@
 import torch
 from torch.utils.data import DataLoader, Dataset
 from config import config
+from tool.data_path import (dataset_arg,
+                            get_feature_paths)
 import pandas as pd
 import numpy as np
-dataset_arg = config["dataset"]
 process_arg = config["preprocessing"]
 
 
 class BaseAudioDataset(Dataset):
     def __init__(self) :
-        self.feature_folder = dataset_arg["feature_folder"]
+        self.feature_folder = config["feature_folder"]
         self.meta_file = dataset_arg["meta_file"]
         self.meta = pd.read_csv(self.meta_file)
         self.files, self.targets = None, None
@@ -24,8 +25,12 @@ class BaseAudioDataset(Dataset):
         return spectrogram, self.targets[index]
 
     def init_files_and_targets(self):
-        self.files = (self.feature_folder + self.meta["filename"]+".npy").values
-        self.targets = self.meta["target"].values
+        # self.files = (self.feature_folder + self.meta["filename"]+".npy").values
+        self.files = get_feature_paths(self.meta)
+        if config["dataset"] == "ESC":
+            self.targets = self.meta["target"].values
+        elif config["dataset"] == "Urbsound8k":
+            self.targets = self.meta["classID"].values
 
 
 class AudioDataset(BaseAudioDataset):
@@ -40,8 +45,7 @@ class AudioDataset(BaseAudioDataset):
 
 
 def get_feature_shape():
-    import glob
-    filename = glob.glob(dataset_arg["feature_folder"] + "*")[0]
+    filename = get_feature_paths(pd.read_csv(dataset_arg["meta_file"]))[0]
     return np.load(filename).shape[-2:]  # 取最後兩維度 freq,time dim
 
 
@@ -56,13 +60,33 @@ def get_a_batch_samples():
     x,y = next(iter(dataloader))
     return x,y
 
-if __name__ == "__main__":
-    dataset = BaseAudioDataset()
-    print( dataset[0][0].shape, dataset[0][1])
-    print( len(dataset))
+def test():
+    train= AudioDataset(train=True)
+    test= AudioDataset(train=False)
+    print(test.files[:10])
+    print(test.meta[:10])
+    print(test.targets[:10])
+    print(test.files[:10])
+    print(test.targets[:10])
+def test_number():
+    train= AudioDataset(train=True)
+    test= AudioDataset(train=False)
+    print(len(test.files))
+    print(len(train.files))
 
-    # dataset = AudioDataset(train=True)
+    
+if __name__ == "__main__":
+    # test_number()
+    test()
+    exit()
+
+    dataset = BaseAudioDataset()
+    # print( dataset[0][0].shape, dataset[10][1])
+    print((dataset[2]),dataset[1])
     # print( len(dataset))
+
+    dataset = AudioDataset(train=True)
+    print((dataset[2]),dataset[1])
 
     # print( get_a_dataset_sample() )
     # print( AudioDataset(train=True)[0])

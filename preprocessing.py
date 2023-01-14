@@ -10,28 +10,38 @@ import librosa as ra
 import numpy as np
 from tqdm import tqdm
 from joblib import Parallel, delayed
+from tool.data_path import (dataset_arg,
+                            get_audio_filenames,
+                            get_source_audio_paths,
+                            get_resample_audio_paths,
+                            get_feature_paths)
 import pandas as pd
 process_arg = config['preprocessing']
-new_sr = process_arg['new_sr']
-dataset_arg = config['dataset']
 
+
+audio_size = process_arg["new_sr"] * process_arg["times"]
+def resample_fixlength_and_save(file, new_path):
+    if file.name != new_path.name:
+        raise RuntimeError("resmaple file", file.name, new_path.name)
+    new_path.parent.mkdir(exist_ok=True)
+    wav, _ = ra.load(file, sr=process_arg['new_sr'])
+    if wav.shape[-1] != audio_size:
+        wav = ra.util.fix_length(wav, size=audio_size)
+    sf.write(new_path, wav, process_arg['new_sr'])
 
 def create_resampled_folder(resample_audio_folder):
     print("create resample audio folder ", resample_audio_folder)
     resample_audio_folder.mkdir(parents=True)
-    audio_paths = list(Path(dataset_arg['audio_folder']).glob("*.wav"))
-    new_audio_paths = [resample_audio_folder/path.name for path in audio_paths]
+    audio_paths = get_source_audio_paths()
+    new_audio_paths = get_resample_audio_paths()
 
-    def resample_and_save(file, new_path):
-        wav, _ = ra.load(file, sr=process_arg['new_sr'])
-        sf.write(new_path, wav, process_arg['new_sr'])
     arguments = zip(audio_paths, new_audio_paths)
-    Parallel(n_jobs=12)(delayed(resample_and_save)(file, new_path)
+    Parallel(n_jobs=12)(delayed(resample_fixlength_and_save)(file, new_path)
                         for file, new_path in tqdm(arguments, total=len(audio_paths)))
 
 
 def get_an_filename():
-    filenames = glob.glob(dataset_arg['audio_folder'] + '/*.wav')
+    filenames = get_source_audio_paths()
     file = filenames[1]
     return file
 
@@ -76,30 +86,31 @@ def processing_a_audio(file):
         feature = get_stft_and_phase_of_file(file)
     else:
         raise RuntimeError(f"Unknown processing feature {process_arg['feature']}")
-
     if process_arg["normalize"]:
         feature = normalized_data(feature)
     return feature
 
 
-def save_feature(file, feature):
-    save_path = Path( config['dataset']['feature_folder'] ) / (Path(file).name + ".npy")
+def save_feature(save_path: Path, feature: np.ndarray):
+    save_path.parent.mkdir(exist_ok=True)
     np.save(save_path, feature)
     return save_path
 
 
-def processing_and_save_a_file(file):
+def processing_and_save_a_file(file: Path, save_path: Path):
+    if file.stem != save_path.stem[:-4]:  # check xx.wav , xxx.wav.npy
+        raise RuntimeError(f"filename is not save filename", file.stem, save_path.stem)
     feature = processing_a_audio(file)
-    save_feature( file , feature )
+    save_feature(save_path, feature)
 
 
 def make_data_folder():
-    data_folder = Path( config['dataset']['feature_folder'] )
+    data_folder = Path(config['feature_folder'])
     if data_folder.exists():
         print( f"feature folder {data_folder} exist." )
         return False
     else:
-        data_folder.mkdir( exist_ok=True )
+        data_folder.mkdir(parents=True, exist_ok=True)
         print( f"create data folder:{data_folder}" )
     return True
 
@@ -115,19 +126,23 @@ def main(show=True):
     if show:
         show_preprocessing_message()
 
-    resample_audio_folder = Path(process_arg['resample_audio_folder'])/f"audio_sr{process_arg['new_sr']}"
+    resample_audio_folder = Path(process_arg['resample_audio_folder'])
+    resample_audio_folder = resample_audio_folder/f"{config['dataset']}_sr{process_arg['new_sr']}"
     if not resample_audio_folder.exists():
         create_resampled_folder(resample_audio_folder)
     else:
         print("resample audio folder ", resample_audio_folder, "exists")
 
-    dataset_arg['audio_folder'] = str(resample_audio_folder)
+    dataset_arg['audio_folder'] = str(resample_audio_folder) +'/'
+
     if not make_data_folder():
         return  # 跳出 preprocessing
-    audio_files = glob.glob( dataset_arg['audio_folder']+ '/*.wav' )
+    audio_paths = get_source_audio_paths()
+    arguments = zip(audio_paths, get_feature_paths(meta))
 
-    features = Parallel(n_jobs=8)(delayed(processing_and_save_a_file)(file)
-                                  for file in tqdm(audio_files))
+    Parallel(n_jobs=1)(
+            delayed(processing_and_save_a_file)(file, new_path)
+            for file, new_path in tqdm(arguments, total=len(audio_paths)))
 
 if __name__ == "__main__":
     main(show=True)
