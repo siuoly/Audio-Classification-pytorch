@@ -1,12 +1,12 @@
 preprocessing:
   resample_audio_folder: ./data
   times: 4 # seconds, ESC:5, Urbsound8k:4
-  new_sr: 16000  # 16k 比8k 好
+  new_sr: 44100  # 16k 比8k 好
   # feature: stft
   feature: mel
   mel_arg:
     power: 2
-    n_fft: 2048  # 2048比1024好
+    n_fft: 4096  # 2048比1024好
     hop_length: 1024  # 和320差不多, 育大愈好
     n_mels: 128
     # fmin: 100
@@ -18,8 +18,8 @@ preprocessing:
   dbscale: True  # 一定要有
   normalize: False # 不論有沒有dbscale, 這個不一定要有
 
-dataset: Urbsound8k  # ESC  Urbsound8k
-# dataset: ESC  # ESC  Urbsound8k
+# dataset: Urbsound8k  # ESC  Urbsound8k
+dataset: ESC  # ESC  Urbsound8k
 ESC_dataset:
   audio_folder: /home/siuoly/ml/datasets/ESC-50-master/audio/
   meta_file: /home/siuoly/ml/datasets/ESC-50-master/meta/esc50.csv
@@ -29,6 +29,7 @@ Urbsound8k_dataset:
 
 feature_folder: ./data/db_noNorm_sr16000_nfft2048_hop320_n_mels128/ #  0.707
 feature_folder: ./data/xx
+feature_folder: ./data/db_noNorm_sr44100_nfftt4096_hop1024_mels128/
 model:
   name: GeneralCnn
   arg:

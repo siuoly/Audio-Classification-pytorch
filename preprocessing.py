@@ -140,7 +140,7 @@ def main(show=True):
     audio_paths = get_source_audio_paths()
     arguments = zip(audio_paths, get_feature_paths(meta))
 
-    Parallel(n_jobs=1)(
+    Parallel(n_jobs=12)(
             delayed(processing_and_save_a_file)(file, new_path)
             for file, new_path in tqdm(arguments, total=len(audio_paths)))
 
