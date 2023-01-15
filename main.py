@@ -13,7 +13,7 @@ def train_a_parameter(setting, keyword,value,fold=False,show=False,using_bar=Fal
     if not fold:
         trainer.train_all_epoch(show=show,using_bar=using_bar)
         print(trainer.get_best_epoch_message())
-        # send_configed_message(config, trainer.get_best_epoch_message() )
+        send_configed_message(config, trainer.get_best_epoch_message() )
     else:
         trainer.train_k_fold(using_bar=using_bar)
         send_configed_message(config, trainer.get_k_fold_message() )

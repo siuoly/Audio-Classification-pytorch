@@ -65,7 +65,7 @@ class CNNNetwork(nn.Module):
     def forward(self, input_data):
         if len(input_data.shape) != 4:  # (N,f,t) -->(N,1,f,t)
             input_data = input_data.unsqueeze(1)
-        if False and self.training and config["transform"]:  # 手動關閉, 他不會自動檢查 model.eval()
+        if self.training and config["transform"]:  # 手動關閉, 他不會自動檢查 model.eval()
             input_data = self.transform(input_data)
         x = self.conv(input_data)
         x = self.flatten(x)
