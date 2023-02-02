@@ -3,7 +3,7 @@ from pprint import pprint
 from dataset import (AudioDataset,
                      get_a_batch_samples,
                      get_feature_shape)
-from models.cnn import CNNNetwork
+from models.model import CNNNetwork
 import torch, sys
 from io import StringIO
 from torch import optim

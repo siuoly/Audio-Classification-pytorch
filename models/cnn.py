@@ -74,7 +74,6 @@ class CNNNetwork(nn.Module):
 
     def compute_linear_layer_dim(self):
         x = torch.ones((config["batch_size"], *self.x_shape))
-        print(x.shape)
         x = self.conv(x)
         x = self.flatten(x)
         return x.shape[-1]

@@ -20,19 +20,16 @@ def train_a_parameter(setting, keyword,value,fold=False,show=False,using_bar=Fal
 
 
 if __name__ == "__main__":
-    preprocessing(show=False)
+    preprocessing(show=True)
     trainer = Trainer()
     # trainer.train_all_epoch()
 
 
     config["num_epoch"] = 500
-    # train_a_parameter(config,"lr",4e-4,fold=True,show=False,using_bar=True)  #mean..694 std:.
     # train_a_parameter(config,"lr",3e-4,fold=True,show=False,using_bar=True)  #mean.697 std:.
     train_a_parameter(config, "mixup", False,fold=False,show=True,using_bar=False)  #mean.717 std:.021
-    train_a_parameter(config, "mixup", True,fold=False,show=True,using_bar=False)  
+    # train_a_parameter(config, "mixup", True,fold=False,show=True,using_bar=False)  
 
-    # train_a_parameter(config,"lr",1e-4,fold=True,show=False,using_bar=True)  ## .712
-    # train_a_parameter(config,"lr",8e-5,fold=True,show=False,using_bar=True)  # .701
 
     # config['lr'] = 8e-5
     # trainer = Trainer()

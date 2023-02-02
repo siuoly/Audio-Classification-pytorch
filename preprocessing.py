@@ -29,6 +29,7 @@ def resample_fixlength_and_save(file, new_path):
         wav = ra.util.fix_length(wav, size=audio_size)
     sf.write(new_path, wav, process_arg['new_sr'])
 
+
 def create_resampled_folder(resample_audio_folder):
     print("create resample audio folder ", resample_audio_folder)
     resample_audio_folder.mkdir(parents=True)

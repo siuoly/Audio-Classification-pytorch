@@ -2,8 +2,7 @@ preprocessing:
   resample_audio_folder: ../data
   times: 5 # seconds, ESC:5, Urbsound8k:4
   new_sr: 44100  # 16k 比8k 好
-  # feature: stft
-  feature: mel
+  feature: mel  # [stft , mel]
   mel_arg:
     power: 2
     n_fft: 1024  # 2048比1024好
@@ -43,7 +42,7 @@ feature_folder: ../data/delta_sr22050_nfftt1024_hop320_mels128_transform/  # inc
 feature_folder: ../data/delta_sr44100_nfftt1024_hop512_mels128/  # 
 
 model:
-  name: GeneralCnn
+  name: MCTA # GeneralCnn # MCTA
   arg:
     cnn:  # inch,outch,ker,stride,padding,poolker
       - [16,3,1,2,2]
@@ -51,14 +50,15 @@ model:
       - [32,64,3,1,2,2]
       - [128,128,3,1,2,2]
     linear: 256
+in_channel: 3
+transform: False
+mixup: False
+
 exp_folder: ./exp/test1/
 num_epoch: 500
 batch_size: 64
 lr: 2e-4  # 隨著適合的 batch_size 而變化
 num_class: 50
 testfold: 1
-in_channel: 3
-transform: False
-mixup: False
 message: "mixup testing sr44100 nff1024 h512"
 
