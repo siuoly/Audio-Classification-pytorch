@@ -13,6 +13,7 @@ from tqdm import tqdm, trange
 from config import config
 # from tool.output import enable_stdout, disable_stdout
 from tool.draw import get_figure_BytesIO
+from models.augment import Mixup
 # from tool.telegram import send_configed_message
 
 
@@ -53,14 +54,19 @@ class Trainer():
         total_loss = 0
         for x, y in self.trainloader:
             x = x.cuda(); y = y.cuda()
-            pred = self.model(x)
-            loss = self.loss_fn(pred, y)
-            total_loss += loss
-
+            if config["mixup"] is True:
+                mixup = Mixup(config["batch_size"], .2)
+                x = mixup.get_mixup_x(x)
+                pred = self.model(x)
+                loss = mixup.get_loss(pred,y)
+            else:
+                pred = self.model(x)
+                loss = self.loss_fn(pred, y)
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
             self.metric.update(pred, y)
+            total_loss += loss
         self.record_epoch["train_loss"] = total_loss.item()
         self.record_epoch["train_accuracy"] = self.metric.compute()
 

@@ -29,8 +29,6 @@ Urbsound8k_dataset:
   meta_file: /home/siuoly/ml/datasets/UrbanSound8K/metadata/UrbanSound8K.csv
 
 # feature_folder: ../data/db_noNorm_sr16000_nfft2048_hop320_n_mels128/ #  0.707
-# feature_folder: ../data/db_noNorm_sr44100_nfftt4096_hop1024_mels128/
-# feature_folder: ../data/db_noNorm_sr44100_nfftt4096_hop1024_mels128/ # .668
 # feature_folder: ../data/db_noNorm_sr44100_nfftt2048_hop1024_mels128/ #.695, .710
 # feature_folder: ../data/db_noNorm_sr44100_nfftt1024_hop512_mels128/  #.642
 # feature_folder: ../data/db_noNorm_sr22050_nfftt1024_hop512_mels128/ # 94 .670 .710 697
@@ -51,12 +49,13 @@ model:
       - [128,128,3,1,2,2]
     linear: 256
 exp_folder: ./exp/test1/
-num_epoch: 150
+num_epoch: 500
 batch_size: 64
-lr: 4e-4  # 隨著適合的 batch_size 而變化
+lr: 2e-4  # 隨著適合的 batch_size 而變化
 num_class: 50
 testfold: 1
 in_channel: 1
-transform: True
-message: "sr44100 nff1024 h512"
+transform: False
+mixup: False
+message: "mixup testing sr44100 nff1024 h512"
 

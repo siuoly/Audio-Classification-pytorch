@@ -9,7 +9,7 @@ from config import config
 def train_a_parameter(setting, keyword,value,fold=False,show=False,using_bar=False):
     setting[keyword] = value
     trainer = Trainer()
-    trainer.show_init_message()
+    # trainer.show_init_message()
     if not fold:
         trainer.train_all_epoch(show=show,using_bar=using_bar)
         print(trainer.get_best_epoch_message())
@@ -28,7 +28,9 @@ if __name__ == "__main__":
     config["num_epoch"] = 500
     # train_a_parameter(config,"lr",4e-4,fold=True,show=False,using_bar=True)  #mean..694 std:.
     # train_a_parameter(config,"lr",3e-4,fold=True,show=False,using_bar=True)  #mean.697 std:.
-    train_a_parameter(config, "lr", 2e-4,fold=False,show=True,using_bar=False)  #mean.717 std:.021
+    train_a_parameter(config, "mixup", False,fold=False,show=True,using_bar=False)  #mean.717 std:.021
+    train_a_parameter(config, "mixup", True,fold=False,show=True,using_bar=False)  
+
     # train_a_parameter(config,"lr",1e-4,fold=True,show=False,using_bar=True)  ## .712
     # train_a_parameter(config,"lr",8e-5,fold=True,show=False,using_bar=True)  # .701
 

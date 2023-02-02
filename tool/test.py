@@ -11,4 +11,15 @@ print( bio.__sizeof__())
 print( sys.getsizeof(bio))
 print(bio.read(1))
 
-    # print(f)
+
+def test_Mixup():
+    from models.augment import Mixup
+    import torch
+    m = Mixup(3,2)
+    print(m.random_indices, m.lamb)
+    x = torch.arange(6).reshape(3,2,1)
+    print(x)
+    x = m(x)
+    print(x)
+    
+test_Mixup()
