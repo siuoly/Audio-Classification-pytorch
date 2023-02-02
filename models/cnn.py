@@ -37,7 +37,7 @@ class CNNNetwork(nn.Module):
         model_arg = config["model"]["arg"]
         self.x_shape = get_feature_shape()  # input data shpae time, freq dimension
         self.conv = nn.Sequential()
-        self.conv.append(conv_block(config["in_channel"], 16, 3, 1, 2, 2))
+        self.conv.append(conv_block(self.x_shape[0], 16, 3, 1, 2, 2))
         self.conv.append(conv_block(16, 32, 3, 1, 2, 2))
         self.conv.append(conv_block(32, 64, 3, 1, 2, 2))
         self.conv.append(conv_block(64, 128, 3, 1, 2, 2))
@@ -57,8 +57,8 @@ class CNNNetwork(nn.Module):
                 )
         self.softmax = nn.Softmax(dim=1)
         self.transform = nn.Sequential(
-        FrequencyMasking(freq_mask_param=int(self.x_shape[0]*0.5)),
-        TimeMasking( time_mask_param=int(self.x_shape[1]*0.5))
+        FrequencyMasking(freq_mask_param=int(self.x_shape[1]*0.5)),
+        TimeMasking( time_mask_param=int(self.x_shape[2]*0.5))
                           )
 
 
@@ -73,7 +73,8 @@ class CNNNetwork(nn.Module):
         return logit
 
     def compute_linear_layer_dim(self):
-        x = torch.ones((config["batch_size"], config["in_channel"], *self.x_shape))
+        x = torch.ones((config["batch_size"], *self.x_shape))
+        print(x.shape)
         x = self.conv(x)
         x = self.flatten(x)
         return x.shape[-1]
@@ -88,8 +89,7 @@ class CNNNetwork(nn.Module):
 
     def summary(self):
         summary(self.cuda(),
-                input_size=(config["batch_size"],
-                            config["in_channel"], *self.x_shape))
+                input_size=(config["batch_size"], *self.x_shape))
 
 if __name__ == "__main__":
     cnn = CNNNetwork()

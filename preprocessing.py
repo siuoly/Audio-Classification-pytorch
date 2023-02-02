@@ -66,26 +66,29 @@ def get_mel_of_file(file):
     wav, sr = ra.load(file, sr=process_arg['new_sr'])
     mel = ra.feature.melspectrogram(y=wav, sr=sr, **process_arg['mel_arg'])
     if process_arg["dbscale"] is True:
-        mel = ra.power_to_db(mel)
+        mel = ra.power_to_db(mel)[None,...]  # (f,t) --> (1,f,t)
     return mel
 
 
-def get_stft_and_phase_of_file(file):
-    wav, sr = ra.load(file, sr=process_arg['new_sr'])
-    stft = ra.stft(y=wav, **process_arg['stft_arg'])
-    if config["in_channel"] == 2:
-        phase = np.angle(stft)
-        return np.stack([np.abs(stft)**2, phase])
-    else:
-        return np.abs(stft)**2
+# 這個後來打算拿掉
+# def get_stft_and_phase_of_file(file):
+#     wav, sr = ra.load(file, sr=process_arg['new_sr'])
+#     stft = ra.stft(y=wav, **process_arg['stft_arg'])
+#     if config["in_channel"] == 2:
+#         phase = np.angle(stft)
+#         return np.stack([np.abs(stft)**2, phase])
+#     else:
+#         return np.abs(stft)**2
 
 def processing_a_audio(file):
     if process_arg["feature"] == "mel":
         feature = get_mel_of_file(file)
-    elif process_arg["feature"] == "stft":
-        feature = get_stft_and_phase_of_file(file)
+    # elif process_arg["feature"] == "stft":
+    #     feature = get_stft_and_phase_of_file(file)
     else:
         raise RuntimeError(f"Unknown processing feature {process_arg['feature']}")
+    if process_arg["delta"]:
+        feature = get_detlta_feature(feature)
     if process_arg["normalize"]:
         feature = normalized_data(feature)
     return feature
@@ -115,10 +118,17 @@ def make_data_folder():
     return True
 
 
+def get_detlta_feature(feature):
+    return np.concatenate([feature,
+                           ra.feature.delta(feature, order=1),
+                           ra.feature.delta(feature, order=2)])
+
+
 def normalized_data(x):
-    axis = tuple(np.arange(x.ndim)[-2:])  # 取最後兩維度(0,1) or (0,1,2)
+    axis = (1, 2)  # 取(0,1,2)最後兩維度
     return (x-x.mean(axis=axis, keepdims=True)) / \
         x.std(axis=axis, keepdims=True)
+
 
 def main(show=True):
     meta = dataset_arg['meta_file']

@@ -1,13 +1,13 @@
 preprocessing:
   resample_audio_folder: ../data
   times: 5 # seconds, ESC:5, Urbsound8k:4
-  new_sr: 22050  # 16k 比8k 好
+  new_sr: 44100  # 16k 比8k 好
   # feature: stft
   feature: mel
   mel_arg:
     power: 2
     n_fft: 1024  # 2048比1024好
-    hop_length: 320  # 和320差不多, 育大愈好
+    hop_length: 512  # 和320差不多, 育大愈好
     n_mels: 128
     # fmin: 100
     fmax: 10000
@@ -15,8 +15,9 @@ preprocessing:
   stft_arg:
     n_fft: 512 
     hop_length: 256
-  dbscale: True  # 一定要有
+  dbscale: True  # 一定要有, 即是 log-melspectrogram
   normalize: False # 不論有沒有dbscale, 這個不一定要有
+  delta: True  # (origin,delea,delta-delta) 3 channel
 
 # dataset: Urbsound8k  # ESC  Urbsound8k
 dataset: ESC  # ESC  Urbsound8k
@@ -37,7 +38,9 @@ feature_folder: ../data/db_noNorm_sr22050_nfftt1024_hop320_mels128/  # 98
 feature_folder: ../data/esc10db_Norm_sr22050_nfftt1024_hop320_mels128/  # 94 .850
 feature_folder: ../data/esc10db_no_Norm_sr22050_nfftt1024_hop320_mels128/  # 94 .875
 feature_folder: ../data/esc10_db_no_Norm_sr22050_nfftt1024_hop320_mels128_transform/  # 94 .887
-feature_folder: ../data/db_no_Norm_sr22050_nfftt1024_hop320_mels128_transform/  # 94
+# feature_folder: ../data/db_no_Norm_sr22050_nfftt1024_hop320_mels128_transform/  # 94
+feature_folder: ../data/delta_sr22050_nfftt1024_hop320_mels128_transform/  # inchannel:3
+feature_folder: ../data/delta_sr44100_nfftt1024_hop512_mels128/  # 
 
 model:
   name: GeneralCnn
@@ -54,7 +57,7 @@ batch_size: 64
 lr: 2e-4  # 隨著適合的 batch_size 而變化
 num_class: 50
 testfold: 1
-in_channel: 1
+in_channel: 3
 transform: False
 mixup: False
 message: "mixup testing sr44100 nff1024 h512"

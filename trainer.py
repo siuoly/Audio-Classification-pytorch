@@ -141,13 +141,13 @@ class Trainer():
         return get_figure_BytesIO( title=record_type, data = data )
         # for send messsage to telegram
 
-# trainer = Trainer()
-# trainer.show_init_message()
+if __name__ == "__main__":
+    trainer = Trainer()
+    trainer.show_init_message()
+    # trainer.train_a_epoch()
+    trainer.train_all_epoch()
+    # send_configed_message(config, trainer.get_best_epoch_message())
 
-# trainer.train_a_epoch()
-
-# trainer.train_all_epoch()
-# send_configed_message(config, trainer.get_best_epoch_message())
 
 # TODO
 

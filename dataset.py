@@ -46,7 +46,7 @@ class AudioDataset(BaseAudioDataset):
 
 def get_feature_shape():
     filename = get_feature_paths(pd.read_csv(dataset_arg["meta_file"]))[0]
-    return np.load(filename).shape[-2:]  # 取最後兩維度 freq,time dim
+    return np.load(filename).shape  # 取最後兩維度 freq,time dim
 
 
 def get_a_dataset_sample():

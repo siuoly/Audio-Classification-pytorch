@@ -5,7 +5,7 @@ from dataset import get_feature_shape
 import torch.nn.functional as F
 
 def get_transform():
-    fdim, tdim = get_feature_shape()
+    _, fdim, tdim = get_feature_shape()
     transform = nn.Sequential(
             TimeMasking( time_mask_param=int(tdim*0.3)),
             FrequencyMasking(freq_mask_param=int(fdim*0.3))
